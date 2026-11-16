@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+
+<body>
+    <div class="card">
+        <h1>Product Management System</h1>
+        <!-- Flash messages from redirect -->
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div class="controls">
+            <!-- Add new product -->
+            <a th:href="@{/products/new}" class="btn btn-primary">Add New Product</a>
+            <!-- Search by name -->
+            <form th:action="@{/products}" method="get" class="search-bar">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by name...">
+
+                <button type="submit" class="btn btn-secondary">Search</button>
+                <a th:href="@{/products}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+
+        <!-- Category filter buttons -->
+        <div class="filter-bar" th:if="${categories != null and !categories.isEmpty()}">
+            <a th:href="@{/products}" class="btn btn-sm btn-secondary">All</a>
+            <a th:each="cat : ${categories}" th:href="@{/products(category=${cat})}" th:text="${cat}" 
+                th:classappend="${cat == selectedCategory} ? ' btn-primary' : ' btn-secondary'" class="btn btn-sm">
+            </a>
+        </div>
+        <!-- Product table -->
+        <table th:if="${products != null and !products.isEmpty()}" style="margin-top: 18px;">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Category</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.productCode}">P001</td>
+                    <td th:text="${product.name}">Product Name</td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$0.00</td>
+                    <td th:text="${product.quantity}">0</td>
+                    <td th:text="${product.category}">Category</td>
+                    <td th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd')}">2024-
+                        01-01</td>
+                    <td class="actions-cell">
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-sm btn-success">Edit</a>
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Delete this product?')">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="empty-state" th:if="${products == null or products.isEmpty()}">
+            <p>No products found.</p>
+            <a th:href="@{/products/new}" class="btn btn-primary" style="margin-top: 12px;">
+                Add your first product
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
