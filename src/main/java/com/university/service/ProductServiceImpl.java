@@ -7,16 +7,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.university.entity.Product;
-import com.university.repository.ProductRepo;
+import com.university.repository.ProductRepository;
 
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepo repository;
-// Constructor injection — Spring injects the repository automatically
+    private final ProductRepository repository;
+    // Constructor injection — Spring injects the repository automatically
 
-    public ProductServiceImpl(ProductRepo repository) {
+    public ProductServiceImpl(ProductRepository repository) {
         this.repository = repository;
     }
 
@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product saveProduct(Product product) {
-// Business rule: product codes must be unique
+    // Business rule: product codes must be unique
         if (product.getId() == null
                 && repository.existsByProductCode(product.getProductCode())) {
             throw new IllegalArgumentException(
@@ -45,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-// Verify the product exists before deleting
+    // Verify the product exists before deleting
         if (!repository.existsById(id)) {
             throw new IllegalArgumentException("Product not found with id: " + id);
         }

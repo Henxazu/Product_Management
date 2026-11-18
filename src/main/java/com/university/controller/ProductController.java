@@ -47,16 +47,16 @@ public class ProductController {
         model.addAttribute("categories", productService.getAllCategories());
         return "product-list";
     }
-// GET /products/new
 
+    // GET /products/new
     @GetMapping("/new")
     public String showNewForm(Model model) {
         model.addAttribute("product", new Product());
         model.addAttribute("categories", productService.getAllCategories());
         return "product-form";
     }
-// GET /products/edit/1
 
+    // GET /products/edit/1
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model,
             RedirectAttributes redirectAttributes) {
@@ -71,14 +71,15 @@ public class ProductController {
                     return "redirect:/products";
                 });
     }
-// POST /products/save
 
+    // POST /products/save
     @PostMapping("/save")
     public String saveProduct(@ModelAttribute("product") Product product,
             RedirectAttributes redirectAttributes) {
         try {
+            boolean isNew = product.getId() == null;
             productService.saveProduct(product);
-            String msg = product.getId() == null
+            String msg = isNew
                     ? "Product added successfully!"
                     : "Product updated successfully!";
             redirectAttributes.addFlashAttribute("message", msg);
@@ -90,15 +91,15 @@ public class ProductController {
         }
         return "redirect:/products";
     }
-// GET /products/delete/1
 
+    // GET /products/delete/1
     @GetMapping("/delete/{id}")
     public String deleteProduct(@PathVariable Long id,
             RedirectAttributes redirectAttributes) {
         try {
             productService.deleteProduct(id);
             redirectAttributes.addFlashAttribute("message", "Product delete successfully !");
-} catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/products";

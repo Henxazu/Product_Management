@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.university.entity.Product;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 // Derived query methods — Spring generates the SQL from the method name
 
     List<Product> findByCategory(String category);
