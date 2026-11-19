@@ -1,5 +1,6 @@
 package com.university.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -24,28 +25,72 @@ public class ProductController {
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-// GET /products
-// GET /products?category=Electronics
-// GET /products?keyword=laptop
+    // GET /products
+    // GET /products?category=Electronics
+    // GET /products?keyword=laptop
+    // GET /products?sortBy=price&sortDir=desc
 
     @GetMapping
     public String listProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
             Model model) {
+        String normalizedDir = "desc".equalsIgnoreCase(sortDir) ? "desc" : "asc";
         List<Product> products;
         if (keyword != null && !keyword.isBlank()) {
-            products = productService.searchProducts(keyword);
+            products = productService.searchProducts(keyword, sortBy, normalizedDir);
             model.addAttribute("keyword", keyword);
         } else if (category != null && !category.isBlank()) {
-            products = productService.getProductsByCategory(category);
+            products = productService.getProductsByCategory(category, sortBy, normalizedDir);
             model.addAttribute("selectedCategory", category);
         } else {
-            products = productService.getAllProducts();
+            products = productService.getAllProducts(sortBy, normalizedDir);
         }
         model.addAttribute("products", products);
         model.addAttribute("categories", productService.getAllCategories());
+        model.addAttribute("baseUrl", "/products");
+        addSortAttributes(model, sortBy, normalizedDir);
+        addStatistics(model);
         return "product-list";
+    }
+
+    // GET /products/advanced-search?name=...&category=...&minPrice=...&maxPrice=...&sortBy=...&sortDir=...
+    @GetMapping("/advanced-search")
+    public String advancedSearch(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            Model model) {
+        String normalizedDir = "desc".equalsIgnoreCase(sortDir) ? "desc" : "asc";
+        List<Product> products = productService.advancedSearch(name, category, minPrice, maxPrice,
+                sortBy, normalizedDir);
+        model.addAttribute("products", products);
+        model.addAttribute("categories", productService.getAllCategories());
+        model.addAttribute("baseUrl", "/products/advanced-search");
+        model.addAttribute("name", name);
+        model.addAttribute("selectedCategory", category);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        addSortAttributes(model, sortBy, normalizedDir);
+        addStatistics(model);
+        return "product-list";
+    }
+
+    private void addSortAttributes(Model model, String sortBy, String sortDir) {
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", "asc".equals(sortDir) ? "desc" : "asc");
+    }
+
+    private void addStatistics(Model model) {
+        model.addAttribute("totalProducts", productService.getTotalProductCount());
+        model.addAttribute("categoryCounts", productService.getProductCountByCategory());
+        model.addAttribute("totalInventoryValue", productService.getTotalInventoryValue());
     }
 
     // GET /products/new

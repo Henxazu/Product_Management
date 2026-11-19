@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// import org.hibernate.annotations.processing.Pattern;
+
+// import jakarta.validation.constraints.*;
+
 @Entity
 @Table(name = "products")
 public class Product {
@@ -11,24 +15,34 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "product_code", unique = true, nullable = false, length = 20)
+    // @NotBlank(message = "Product code isuire d")
+    // @Pattern(regexp = "^P\\d{3,}$", message = "Code must start with P followed by
+    // 3+ digits")
     private String productCode;
+
     @Column(nullable = false, length = 100)
     private String name;
-// Use BigDecimal for money — never float or double
+
+    // Use BigDecimal for money — never float or double
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
     @Column(nullable = false)
     private Integer quantity;
+
     @Column(length = 50)
     private String category;
+
     @Column(columnDefinition = "TEXT")
     private String description;
-// updatable = false: Hibernate never includes this column in UPDATE statements
+
+    // updatable = false: Hibernate never includes this column in UPDATE statements
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-// Default constructor is required by Hibernate (for deserialization)
 
+    // Default constructor is required by Hibernate (for deserialization)
     public Product() {
     }
 
@@ -41,13 +55,14 @@ public class Product {
         this.category = category;
         this.description = description;
     }
-// Runs automatically before INSERT — sets the timestamp on the Java object
 
+    // Runs automatically before INSERT — sets the timestamp on the Java object
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-// Getters and Setters
+
+    // Getters and Setters
 
     public Long getId() {
         return id;

@@ -14,6 +14,31 @@
         <!-- Flash messages from redirect -->
         <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Statistics section -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <span class="stat-label">Total Products</span>
+                <span class="stat-value" th:text="${totalProducts}">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Inventory Value</span>
+                <span class="stat-value"
+                    th:text="'$' + ${#numbers.formatDecimal(totalInventoryValue, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+            </div>
+            <div class="stat-card stat-card-wide">
+                <span class="stat-label">Products per Category</span>
+                <div class="category-stats" th:if="${categoryCounts != null and !categoryCounts.isEmpty()}">
+                    <span class="category-badge" th:each="entry : ${categoryCounts}">
+                        <span th:text="${entry.key}">Category</span>:
+                        <strong th:text="${entry.value}">0</strong>
+                    </span>
+                </div>
+                <span class="stat-empty" th:if="${categoryCounts == null or categoryCounts.isEmpty()}">No
+                    categories</span>
+            </div>
+        </div>
+
         <div class="controls">
             <!-- Add new product -->
             <a th:href="@{/products/new}" class="btn btn-primary">Add New Product</a>
@@ -29,20 +54,120 @@
         <!-- Category filter buttons -->
         <div class="filter-bar" th:if="${categories != null and !categories.isEmpty()}">
             <a th:href="@{/products}" class="btn btn-sm btn-secondary">All</a>
-            <a th:each="cat : ${categories}" th:href="@{/products(category=${cat})}" th:text="${cat}" 
+            <a th:each="cat : ${categories}" th:href="@{/products(category=${cat})}" th:text="${cat}"
                 th:classappend="${cat == selectedCategory} ? ' btn-primary' : ' btn-secondary'" class="btn btn-sm">
             </a>
         </div>
+
+        <!-- Advanced search form -->
+        <form th:action="@{/products/advanced-search}" method="get" class="advanced-search-form">
+            <div class="field-toggles">
+                <span class="toggle-label">Filters:</span>
+                <button type="button" class="btn btn-sm field-toggle-btn" data-target="field-name"
+                    th:classappend="${name != null and !name.isEmpty()} ? ' active' : ''"
+                    onclick="toggleSearchField(this, 'field-name')">
+                    Name
+                </button>
+                <button type="button" class="btn btn-sm field-toggle-btn" data-target="field-category"
+                    th:classappend="${(selectedCategory != null and !selectedCategory.isEmpty()) or (category != null and !category.isEmpty())} ? ' active' : ''"
+                    onclick="toggleSearchField(this, 'field-category')">
+                    Category
+                </button>
+                <button type="button" class="btn btn-sm field-toggle-btn" data-target="field-minPrice"
+                    th:classappend="${minPrice != null} ? ' active' : ''"
+                    onclick="toggleSearchField(this, 'field-minPrice')">
+                    Min Price
+                </button>
+                <button type="button" class="btn btn-sm field-toggle-btn" data-target="field-maxPrice"
+                    th:classappend="${maxPrice != null} ? ' active' : ''"
+                    onclick="toggleSearchField(this, 'field-maxPrice')">
+                    Max Price
+                </button>
+            </div>
+
+            <div class="active-fields-row">
+                <div id="field-name" class="search-field-item"
+                    th:classappend="${name != null and !name.isEmpty()} ? ' active' : ''">
+                    <input type="text" name="name" th:value="${name}" placeholder="Product name..."
+                        th:disabled="${name == null or name.isEmpty()}">
+                </div>
+
+                <div id="field-category" class="search-field-item"
+                    th:classappend="${(selectedCategory != null and !selectedCategory.isEmpty()) or (category != null and !category.isEmpty())} ? ' active' : ''">
+                    <select name="category"
+                        th:disabled="${(selectedCategory == null or selectedCategory.isEmpty()) and (category == null or category.isEmpty())}">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                            th:selected="${cat == selectedCategory or cat == category}">
+                        </option>
+                    </select>
+                </div>
+
+                <div id="field-minPrice" class="search-field-item"
+                    th:classappend="${minPrice != null} ? ' active' : ''">
+                    <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Min price" step="0.01"
+                        min="0" th:disabled="${minPrice == null}">
+                </div>
+
+                <div id="field-maxPrice" class="search-field-item"
+                    th:classappend="${maxPrice != null} ? ' active' : ''">
+                    <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Max price" step="0.01"
+                        min="0" th:disabled="${maxPrice == null}">
+                </div>
+
+                <div class="search-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">Advanced Search</button>
+                    <a th:href="@{/products}" class="btn btn-secondary btn-sm">Reset</a>
+                </div>
+            </div>
+        </form>
+
         <!-- Product table -->
         <table th:if="${products != null and !products.isEmpty()}" style="margin-top: 18px;">
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th>Category</th>
-                    <th>Created</th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='productCode', sortDir=${sortBy == 'productCode' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Code
+                            <span class="sort-indicator" th:if="${sortBy == 'productCode'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Name
+                            <span class="sort-indicator" th:if="${sortBy == 'name'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='price', sortDir=${sortBy == 'price' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Price
+                            <span class="sort-indicator" th:if="${sortBy == 'price'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='quantity', sortDir=${sortBy == 'quantity' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Qty
+                            <span class="sort-indicator" th:if="${sortBy == 'quantity'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='category', sortDir=${sortBy == 'category' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Category
+                            <span class="sort-indicator" th:if="${sortBy == 'category'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{${baseUrl}(sortBy='createdAt', sortDir=${sortBy == 'createdAt' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            Created
+                            <span class="sort-indicator" th:if="${sortBy == 'createdAt'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -70,6 +195,23 @@
             </a>
         </div>
     </div>
+
+    <script>
+        function toggleSearchField(button, fieldId) {
+            const fieldContainer = document.getElementById(fieldId);
+            const input = fieldContainer.querySelector('input, select');
+            const isActive = button.classList.toggle('active');
+
+            fieldContainer.classList.toggle('active', isActive);
+            if (isActive) {
+                input.disabled = false;
+                input.focus();
+            } else {
+                input.value = '';
+                input.disabled = true;
+            }
+        }
+    </script>
 </body>
 
 </html>
