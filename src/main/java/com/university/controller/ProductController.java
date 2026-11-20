@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+//Validation
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+
 import com.university.entity.Product;
 import com.university.service.ProductService;
 
@@ -25,6 +29,7 @@ public class ProductController {
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
+
     // GET /products
     // GET /products?category=Electronics
     // GET /products?keyword=laptop
@@ -56,7 +61,8 @@ public class ProductController {
         return "product-list";
     }
 
-    // GET /products/advanced-search?name=...&category=...&minPrice=...&maxPrice=...&sortBy=...&sortDir=...
+    // GET
+    // /products/advanced-search?name=...&category=...&minPrice=...&maxPrice=...&sortBy=...&sortDir=...
     @GetMapping("/advanced-search")
     public String advancedSearch(
             @RequestParam(required = false) String name,
@@ -119,17 +125,25 @@ public class ProductController {
 
     // POST /products/save
     @PostMapping("/save")
-    public String saveProduct(@ModelAttribute("product") Product product,
-            RedirectAttributes redirectAttributes) {
+    public String saveProduct(@Valid @ModelAttribute("product") Product product,
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", productService.getAllCategories());
+            return "product-form";
+        }
+        boolean isNew = product.getId() == null;
         try {
-            boolean isNew = product.getId() == null;
             productService.saveProduct(product);
             String msg = isNew
                     ? "Product added successfully!"
                     : "Product updated successfully!";
             redirectAttributes.addFlashAttribute("message", msg);
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("categories", productService.getAllCategories());
+            return "product-form";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error saving product: "
                     + e.getMessage());
@@ -143,7 +157,7 @@ public class ProductController {
             RedirectAttributes redirectAttributes) {
         try {
             productService.deleteProduct(id);
-            redirectAttributes.addFlashAttribute("message", "Product delete successfully !");
+            redirectAttributes.addFlashAttribute("message", "Product deleted successfully!");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

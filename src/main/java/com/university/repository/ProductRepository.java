@@ -13,7 +13,7 @@ import com.university.entity.Product;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-// Derived query methods — Spring generates the SQL from the method name
+    // Derived query methods — Spring generates the SQL from the method name
 
     List<Product> findByCategory(String category);
 
@@ -30,7 +30,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByProductCode(String productCode);
 
     long countByCategory(String category);
-// JPQL query — explicit when method naming is insufficient
+    // JPQL query — explicit when method naming is insufficient
 
     @Query("SELECT DISTINCT p.category FROM Product p ORDER BY p.category")
     List<String> findAllCategories();
@@ -46,13 +46,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("category") String category,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
-            Sort sort
-    );
-    
+            Sort sort);
+
     // Statistics queries
     @Query("SELECT COALESCE(p.category, 'Uncategorized'), COUNT(p) FROM Product p GROUP BY p.category ORDER BY p.category")
     List<Object[]> countProductsByCategory();
 
     @Query("SELECT COALESCE(SUM(p.price * p.quantity), 0) FROM Product p")
     BigDecimal calculateTotalInventoryValue();
+
+    List<Product> findByQuantityLessThanOrderByQuantityAsc(Integer threshold);
 }

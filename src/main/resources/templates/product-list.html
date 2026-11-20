@@ -49,6 +49,8 @@
                 <button type="submit" class="btn btn-secondary">Search</button>
                 <a th:href="@{/products}" class="btn btn-secondary">Clear</a>
             </form>
+            <!-- dashboard -->
+            <a th:href="@{/dashboard}" class="btn btn-secondary">Dashboard</a>
         </div>
 
         <!-- Category filter buttons -->
@@ -128,44 +130,50 @@
                 <tr>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='productCode', sortDir=${sortBy == 'productCode' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='productCode', sortDir=${sortBy == 'productCode' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Code
-                            <span class="sort-indicator" th:if="${sortBy == 'productCode'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'productCode'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Name
-                            <span class="sort-indicator" th:if="${sortBy == 'name'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'name'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='price', sortDir=${sortBy == 'price' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='price', sortDir=${sortBy == 'price' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Price
-                            <span class="sort-indicator" th:if="${sortBy == 'price'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'price'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='quantity', sortDir=${sortBy == 'quantity' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='quantity', sortDir=${sortBy == 'quantity' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Qty
-                            <span class="sort-indicator" th:if="${sortBy == 'quantity'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'quantity'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='category', sortDir=${sortBy == 'category' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='category', sortDir=${sortBy == 'category' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Category
-                            <span class="sort-indicator" th:if="${sortBy == 'category'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'category'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>
                         <a class="sort-link"
-                           th:href="@{${baseUrl}(sortBy='createdAt', sortDir=${sortBy == 'createdAt' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                            th:href="@{${baseUrl}(sortBy='createdAt', sortDir=${sortBy == 'createdAt' ? reverseSortDir : 'asc'}, keyword=${keyword}, name=${name}, category=${selectedCategory}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
                             Created
-                            <span class="sort-indicator" th:if="${sortBy == 'createdAt'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                            <span class="sort-indicator" th:if="${sortBy == 'createdAt'}"
+                                th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
                         </a>
                     </th>
                     <th>Actions</th>

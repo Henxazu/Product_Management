@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-title">
+                <h1>Inventory Dashboard</h1>
+                <p class="header-subtitle">Overview of product catalog, valuation, and low-stock alerts</p>
+            </div>
+            <div class="header-actions">
+                <a th:href="@{/products/new}" class="btn btn-primary">+ Add Product</a>
+                <a th:href="@{/products}" class="btn btn-outline">Back to Products</a>
+            </div>
+        </header>
+
+        <!-- Summary KPI Cards -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-label">Total Products</span>
+                <span class="kpi-number" th:text="${dashboard.totalProducts}">0</span>
+                <span class="kpi-caption">Active SKUs in catalog</span>
+            </div>
+
+            <div class="kpi-card kpi-value-accent">
+                <span class="kpi-label">Total Inventory Value</span>
+                <span class="kpi-number"
+                    th:text="'$' + ${#numbers.formatDecimal(dashboard.totalInventoryValue, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                <span class="kpi-caption">Combined stock valuation</span>
+            </div>
+
+            <div class="kpi-card"
+                th:classappend="${!dashboard.lowStockProducts.isEmpty()} ? ' kpi-alert-accent' : ' kpi-ok-accent'">
+                <span class="kpi-label">Low Stock Items (&lt; 10)</span>
+                <span class="kpi-number" th:text="${#lists.size(dashboard.lowStockProducts)}">0</span>
+                <span class="kpi-caption"
+                    th:text="${!dashboard.lowStockProducts.isEmpty()} ? 'Requires restocking attention' : 'All stock levels healthy'">
+                    Stock status
+                </span>
+            </div>
+        </section>
+
+        <!-- Detail Panels -->
+        <section class="dashboard-content">
+            <!-- Products per category -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Products per Category</h2>
+                    <span class="panel-tag" th:text="${#maps.size(dashboard.productsPerCategory)} + ' categories'">0
+                        categories</span>
+                </div>
+
+                <div class="table-wrapper" th:if="${!dashboard.productsPerCategory.isEmpty()}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-right">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry : ${dashboard.productsPerCategory}">
+                                <td>
+                                    <a class="category-link" th:href="@{/products(category=${entry.key})}"
+                                        th:text="${entry.key}">Electronics</a>
+                                </td>
+                                <td class="text-right">
+                                    <span class="count-pill" th:text="${entry.value}">0</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-banner" th:if="${dashboard.productsPerCategory.isEmpty()}">
+                    No categories available yet.
+                </div>
+            </div>
+
+            <!-- Low stock table -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Low Stock Alert (Quantity &lt; 10)</h2>
+                    <span class="panel-tag"
+                        th:classappend="${!dashboard.lowStockProducts.isEmpty()} ? ' tag-danger' : ' tag-success'"
+                        th:text="${!dashboard.lowStockProducts.isEmpty()} ? ${#lists.size(dashboard.lowStockProducts)} + ' alerts' : 'Healthy'">
+                        Healthy
+                    </span>
+                </div>
+
+                <div class="table-wrapper" th:if="${!dashboard.lowStockProducts.isEmpty()}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${dashboard.lowStockProducts}">
+                                <td><span class="code-badge" th:text="${p.productCode}">P001</span></td>
+                                <td th:text="${p.name}">Product</td>
+                                <td>
+                                    <span class="stock-pill"
+                                        th:classappend="${p.quantity <= 3} ? ' stock-critical' : ' stock-warning'"
+                                        th:text="${p.quantity}">5</span>
+                                </td>
+                                <td class="text-right">
+                                    <a th:href="@{/products/edit/{id}(id=${p.id})}"
+                                        class="btn btn-sm btn-success">Restock</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-banner banner-success" th:if="${dashboard.lowStockProducts.isEmpty()}">
+                    All products have sufficient stock.
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

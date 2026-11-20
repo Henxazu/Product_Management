@@ -7,20 +7,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.university.entity.Product;
 import com.university.repository.ProductRepository;
+import com.university.dto.DashBoardView;
 
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "id", "productCode", "name", "price", "quantity", "category", "createdAt"
-    );
+            "id", "productCode", "name", "price", "quantity", "category", "createdAt");
 
     private final ProductRepository repository;
     // Constructor injection — Spring injects the repository automatically
@@ -55,18 +56,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product saveProduct(Product product) {
-    // Business rule: product codes must be unique
-        if (product.getId() == null
-                && repository.existsByProductCode(product.getProductCode())) {
-            throw new IllegalArgumentException(
-                    "Product code already exists: " + product.getProductCode());
+        // Fast-fail check (giúp báo lỗi sớm trong trường hợp thông thường)
+        if (product.getId() == null && repository.existsByProductCode(product.getProductCode())) {
+            throw new IllegalArgumentException("Product code already exists: " + product.getProductCode());
         }
-        return repository.save(product);
+
+        try {
+            return repository.saveAndFlush(product);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException(
+                    "Product code already exists: " + product.getProductCode(), e);
+        }
     }
 
     @Override
     public void deleteProduct(Long id) {
-    // Verify the product exists before deleting
+        // Verify the product exists before deleting
         if (!repository.existsById(id)) {
             throw new IllegalArgumentException("Product not found with id: " + id);
         }
@@ -140,5 +145,24 @@ public class ProductServiceImpl implements ProductService {
     public BigDecimal getTotalInventoryValue() {
         BigDecimal total = repository.calculateTotalInventoryValue();
         return total != null ? total : BigDecimal.ZERO;
+    }
+
+    // DASHBOARD
+    @Override
+    @Transactional(readOnly = true)
+    public DashBoardView getDashBoardData() {
+        long totalProducts = repository.count();
+
+        Map<String, Long> productsPerCategory = new LinkedHashMap<>();
+        for (Object[] row : repository.countProductsByCategory()) {
+            String category = (row[0] != null) ? (String) row[0] : "Uncategorized";
+            Long count = (Long) row[1];
+            productsPerCategory.put(category, count);
+        }
+
+        BigDecimal totalValue = repository.calculateTotalInventoryValue();
+        List<Product> lowStock = repository.findByQuantityLessThanOrderByQuantityAsc(10);
+
+        return new DashBoardView(totalProducts, productsPerCategory, totalValue, lowStock);
     }
 }

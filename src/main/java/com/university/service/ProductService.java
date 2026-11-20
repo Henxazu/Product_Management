@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.university.dto.DashBoardView;
 import com.university.entity.Product;
 
 public interface ProductService {
@@ -39,4 +40,6 @@ public interface ProductService {
     Map<String, Long> getProductCountByCategory();
 
     BigDecimal getTotalInventoryValue();
+
+    DashBoardView getDashBoardData();
 }

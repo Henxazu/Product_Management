@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 // import org.hibernate.annotations.processing.Pattern;
 
-// import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "products")
@@ -17,19 +17,24 @@ public class Product {
     private Long id;
 
     @Column(name = "product_code", unique = true, nullable = false, length = 20)
-    // @NotBlank(message = "Product code isuire d")
-    // @Pattern(regexp = "^P\\d{3,}$", message = "Code must start with P followed by
-    // 3+ digits")
+    @NotBlank(message = "Product code is required")
+    @Pattern(regexp = "^P\\d{3,}$", message = "Code must start with P followed by 3+ digits")
     private String productCode;
 
     @Column(nullable = false, length = 100)
+    @NotBlank(message = "Name is required")
+    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
     private String name;
 
     // Use BigDecimal for money — never float or double
     @Column(nullable = false, precision = 10, scale = 2)
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.01", message = "Price must be greater than zero")
     private BigDecimal price;
 
     @Column(nullable = false)
+    @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity must be zero or greater")
     private Integer quantity;
 
     @Column(length = 50)

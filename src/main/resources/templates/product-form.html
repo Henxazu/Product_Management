@@ -13,28 +13,41 @@
         <!-- Dynamic title: Add or Edit -->
         <h1 th:text="${product.id != null} ? 'Edit Product' : 'Add New Product'">Product
             Form</h1>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
         <!-- th:object binds the whole form to the product object -->
         <!-- th:field binds each input to a product property -->
-        <form th:action="@{/products/save}" th:object="${product}" method="post">
+        <form th:action="@{/products/save}" th:object="${product}" method="post" novalidate>
             <!-- Hidden id field: when editing, ensures the correct record is updated -->
             <input type="hidden" th:field="*{id}" />
+
             <div class="form-group">
                 <label for="productCode">Product Code</label>
-                <!-- th:field sets id, name, and value in one attribute -->
-                <input type="text" id="productCode" th:field="*{productCode}" placeholder="e.g. P006" required />
+                <input type="text" id="productCode" th:field="*{productCode}" placeholder="e.g. P006"
+                    th:classappend="${#fields.hasErrors('productCode')} ? 'input-error'" />
+                <span class="error-msg" th:if="${#fields.hasErrors('productCode')}" th:errors="*{productCode}"></span>
             </div>
+
             <div class="form-group">
                 <label for="name">Product Name</label>
-                <input type="text" id="name" th:field="*{name}" placeholder="Enter product name" required />
+                <input type="text" id="name" th:field="*{name}" placeholder="Enter product name"
+                    th:classappend="${#fields.hasErrors('name')} ? 'input-error'" />
+                <span class="error-msg" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
             </div>
+
             <div class="form-group">
                 <label for="price">Price (USD)</label>
-                <input type="number" id="price" th:field="*{price}" step="0.01" min="0" required />
+                <input type="number" id="price" th:field="*{price}" step="0.01"
+                    th:classappend="${#fields.hasErrors('price')} ? 'input-error'" />
+                <span class="error-msg" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
             </div>
+
             <div class="form-group">
                 <label for="quantity">Quantity</label>
-                <input type="number" id="quantity" th:field="*{quantity}" min="0" required />
+                <input type="number" id="quantity" th:field="*{quantity}"
+                    th:classappend="${#fields.hasErrors('quantity')} ? 'input-error'" />
+                <span class="error-msg" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></span>
             </div>
+
             <div class="form-group">
                 <label for="category">Category</label>
                 <select id="category" th:field="*{category}">
@@ -43,10 +56,12 @@
                     <option value="Other">Other</option>
                 </select>
             </div>
+
             <div class="form-group">
                 <label for="description">Description</label>
                 <textarea id="description" th:field="*{description}" placeholder="Optional description"></textarea>
             </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Save Product</button>
                 <a th:href="@{/products}" class="btn btn-secondary">Cancel</a>
